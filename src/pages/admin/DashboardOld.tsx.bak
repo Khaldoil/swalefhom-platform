@@ -1,0 +1,532 @@
+import React, { useState, useEffect } from 'react';
+import {
+  BookOpen,
+  Users,
+  Camera,
+  Calendar,
+  TrendingUp,
+  Eye,
+  UserPlus,
+  MessageSquare,
+  BarChart2,
+  Clock,
+  Activity,
+  Tag,
+  Award,
+  Heart,
+  Star,
+  ChevronRight,
+  ChevronLeft,
+  ArrowRight,
+  BookText,
+  Download,
+  RefreshCw
+} from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import Card from '../../components/Card';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import { useToast } from '../../hooks/useToast';
+import { Link } from 'react-router-dom';
+import { exportToCSV, prepareStoriesForExport, preparePioneersForExport, prepareAmbassadorsForExport } from '../../lib/export-utils';
+import Button from '../../components/Button';
+
+interface Analytics {
+  type: string;
+  item_id: string | null;
+  count: number;
+  updated_at: string;
+}
+
+interface DashboardStats {
+  stories: {
+    total: number;
+    published: number;
+    pending: number;
+    categories: { [key: string]: number };
+  };
+  pioneers: {
+    total: number;
+    achievements: number;
+    books: number;
+  };
+  ambassadors: {
+    total: number;
+    pending: number;
+    approved: number;
+  };
+  gallery: {
+    total: number;
+    images: number;
+    videos: number;
+  };
+  blog: {
+    total: number;
+    published: number;
+    views: number;
+  };
+  glossary: {
+    total: number;
+    categories: { [key: string]: number };
+  };
+}
+
+export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    stories: { total: 0, published: 0, pending: 0, categories: {} },
+    pioneers: { total: 0, achievements: 0, books: 0 },
+    ambassadors: { total: 0, pending: 0, approved: 0 },
+    gallery: { total: 0, images: 0, videos: 0 },
+    blog: { total: 0, published: 0, views: 0 },
+    glossary: { total: 0, categories: {} }
+  });
+  const [analytics, setAnalytics] = useState<Analytics[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [realtimeActivity, setRealtimeActivity] = useState<{
+    activeUsers: number;
+    recentViews: Analytics[];
+  }>({
+    activeUsers: 0,
+    recentViews: [],
+  });
+  const { addToast } = useToast();
+
+  useEffect(() => {
+    loadStats();
+    const channel = setupRealtimeSubscription();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, []);
+
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('analytics-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'analytics'
+        },
+        (payload) => {
+          handleRealtimeUpdate(payload.new);
+        }
+      )
+      .subscribe();
+
+    return channel;
+  };
+
+  const handleRealtimeUpdate = (newAnalytic: any) => {
+    setRealtimeActivity(prev => ({
+      ...prev,
+      recentViews: [newAnalytic, ...prev.recentViews].slice(0, 10),
+      activeUsers: prev.activeUsers + 1
+    }));
+
+    const activityType = newAnalytic.type === 'page_view' ? 'زيارة جديدة' 
+      : newAnalytic.type === 'story_view' ? 'قراءة قصة'
+      : 'نشاط جديد';
+    
+    addToast(`${activityType} على الموقع`, 'info');
+  };
+
+  const loadStats = async () => {
+    try {
+      const [
+        stories,
+        pioneers,
+        ambassadors,
+        gallery,
+        blog,
+        glossary,
+        analyticsData
+      ] = await Promise.all([
+        // Stories
+        supabase.from('stories').select('*'),
+        // Pioneers
+        supabase.from('pioneers').select('*'),
+        // Ambassador Applications
+        supabase.from('ambassador_applications').select('*'),
+        // Gallery
+        supabase.from('gallery_items').select('*'),
+        // Blog
+        supabase.from('blog_posts').select('*'),
+        // Glossary
+        supabase.from('glossary_terms').select('*'),
+        // Analytics
+        supabase.from('analytics').select('*')
+      ]);
+
+      // Process Stories Stats
+      const storiesData = stories.data || [];
+      const storiesStats = {
+        total: storiesData.length,
+        published: storiesData.filter(s => s.status === 'published').length,
+        pending: storiesData.filter(s => s.status === 'draft').length,
+        categories: storiesData.reduce((acc: any, story) => {
+          acc[story.category] = (acc[story.category] || 0) + 1;
+          return acc;
+        }, {})
+      };
+
+      // Process Pioneers Stats
+      const pioneersData = pioneers.data || [];
+      const pioneersStats = {
+        total: pioneersData.length,
+        achievements: pioneersData.reduce((acc, p) => acc + (p.achievements?.length || 0), 0),
+        books: pioneersData.reduce((acc, p) => acc + (p.books?.length || 0), 0)
+      };
+
+      // Process Ambassadors Stats
+      const ambassadorsData = ambassadors.data || [];
+      const ambassadorsStats = {
+        total: ambassadorsData.length,
+        pending: ambassadorsData.filter(a => a.status === 'pending').length,
+        approved: ambassadorsData.filter(a => a.status === 'approved').length
+      };
+
+      // Process Gallery Stats
+      const galleryData = gallery.data || [];
+      const galleryStats = {
+        total: galleryData.length,
+        images: galleryData.filter(g => g.media_type === 'image').length,
+        videos: galleryData.filter(g => g.media_type === 'video').length
+      };
+
+      // Process Blog Stats
+      const blogData = blog.data || [];
+      const blogStats = {
+        total: blogData.length,
+        published: blogData.filter(b => b.status === 'published').length,
+        views: analyticsData.data?.filter(a => a.type === 'blog_view')
+          .reduce((acc, curr) => acc + curr.count, 0) || 0
+      };
+
+      // Process Glossary Stats
+      const glossaryData = glossary.data || [];
+      const glossaryStats = {
+        total: glossaryData.length,
+        categories: glossaryData.reduce((acc: any, term) => {
+          acc[term.category] = (acc[term.category] || 0) + 1;
+          return acc;
+        }, {})
+      };
+
+      setStats({
+        stories: storiesStats,
+        pioneers: pioneersStats,
+        ambassadors: ambassadorsStats,
+        gallery: galleryStats,
+        blog: blogStats,
+        glossary: glossaryStats
+      });
+
+      setAnalytics(analyticsData.data || []);
+
+      // Initialize recent activity
+      const recentAnalytics = analyticsData.data
+        ?.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+        .slice(0, 10) || [];
+
+      setRealtimeActivity(prev => ({
+        ...prev,
+        recentViews: recentAnalytics
+      }));
+
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      addToast('حدث خطأ أثناء تحميل الإحصائيات', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  const handleExportAllData = async () => {
+    try {
+      const [storiesData, pioneersData, ambassadorsData] = await Promise.all([
+        supabase.from('stories').select('*'),
+        supabase.from('pioneers').select('*'),
+        supabase.from('ambassador_applications').select('*')
+      ]);
+
+      if (storiesData.data) {
+        exportToCSV(prepareStoriesForExport(storiesData.data), 'stories');
+      }
+      if (pioneersData.data) {
+        exportToCSV(preparePioneersForExport(pioneersData.data), 'pioneers');
+      }
+      if (ambassadorsData.data) {
+        exportToCSV(prepareAmbassadorsForExport(ambassadorsData.data), 'ambassadors');
+      }
+
+      addToast('تم تصدير جميع البيانات بنجاح', 'success');
+    } catch (error) {
+      console.error('Export error:', error);
+      addToast('حدث خطأ أثناء التصدير', 'error');
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">لوحة التحكم</h1>
+          <p className="text-gray-400">نظرة عامة على إحصائيات الموقع والنشاطات الأخيرة</p>
+        </div>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => loadStats()}
+            variant="secondary"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            تحديث
+          </Button>
+          <Button
+            onClick={handleExportAllData}
+            className="flex items-center gap-2 bg-[#91B9B4] hover:bg-[#658F8A]"
+          >
+            <Download className="w-4 h-4" />
+            تصدير البيانات
+          </Button>
+        </div>
+      </div>
+
+      {/* Real-time Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <div className="flex items-start justify-between">
+            <div>
+              <Activity className="w-6 h-6 text-[#FAC39B] mb-4 animate-pulse" />
+              <h3 className="text-sm font-medium text-gray-400">المستخدمون النشطون</h3>
+              <p className="text-2xl font-bold text-white mt-2">{realtimeActivity.activeUsers}</p>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-green-400">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+              مباشر
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-start justify-between">
+            <div>
+              <BarChart2 className="w-6 h-6 text-[#FAC39B] mb-4" />
+              <h3 className="text-sm font-medium text-gray-400">إجمالي المشاهدات اليوم</h3>
+              <p className="text-2xl font-bold text-white mt-2">
+                {realtimeActivity.recentViews.length}
+              </p>
+            </div>
+            <TrendingUp className="w-6 h-6 text-green-400" />
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Stories Stats */}
+        <Link to="/admin/stories">
+          <Card className="hover:border-[#FAC39B]/20 transition-colors">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <BookOpen className="w-8 h-8 text-[#FAC39B] mb-4" />
+                <h3 className="text-lg font-bold text-white">القصص</h3>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">الإجمالي</p>
+                  <p className="text-2xl font-bold text-white">{stats.stories.total}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">منشورة</p>
+                  <p className="text-2xl font-bold text-green-400">{stats.stories.published}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-2">التصنيفات الأكثر نشاطاً</p>
+                <div className="space-y-2">
+                  {Object.entries(stats.stories.categories)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 3)
+                    .map(([category, count]) => (
+                      <div key={category} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-300">{category}</span>
+                        <span className="text-sm text-[#FAC39B]">{count}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        {/* Pioneers Stats */}
+        <Link to="/admin/pioneers">
+          <Card className="hover:border-[#FAC39B]/20 transition-colors">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <Award className="w-8 h-8 text-[#FAC39B] mb-4" />
+                <h3 className="text-lg font-bold text-white">رواد التراث</h3>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">الرواد</p>
+                <p className="text-2xl font-bold text-white">{stats.pioneers.total}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">الإنجازات</p>
+                <p className="text-2xl font-bold text-[#FAC39B]">{stats.pioneers.achievements}</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        {/* Ambassadors Stats */}
+        <Link to="/admin/applications">
+          <Card className="hover:border-[#FAC39B]/20 transition-colors">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <Users className="w-8 h-8 text-[#FAC39B] mb-4" />
+                <h3 className="text-lg font-bold text-white">السفراء</h3>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">قيد المراجعة</p>
+                <p className="text-2xl font-bold text-yellow-400">{stats.ambassadors.pending}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">معتمدين</p>
+                <p className="text-2xl font-bold text-green-400">{stats.ambassadors.approved}</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        {/* Gallery Stats */}
+        <Link to="/admin/gallery">
+          <Card className="hover:border-[#FAC39B]/20 transition-colors">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <Camera className="w-8 h-8 text-[#FAC39B] mb-4" />
+                <h3 className="text-lg font-bold text-white">معرض الوسائط</h3>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">الصور</p>
+                <p className="text-2xl font-bold text-white">{stats.gallery.images}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">الفيديوهات</p>
+                <p className="text-2xl font-bold text-[#FAC39B]">{stats.gallery.videos}</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        {/* Blog Stats */}
+        <Link to="/admin/blog">
+          <Card className="hover:border-[#FAC39B]/20 transition-colors">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <MessageSquare className="w-8 h-8 text-[#FAC39B] mb-4" />
+                <h3 className="text-lg font-bold text-white">المدونة</h3>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">المقالات</p>
+                <p className="text-2xl font-bold text-white">{stats.blog.total}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">المشاهدات</p>
+                <p className="text-2xl font-bold text-[#FAC39B]">{stats.blog.views}</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        {/* Glossary Stats */}
+        <Link to="/admin/glossary">
+          <Card className="hover:border-[#FAC39B]/20 transition-colors">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <BookText className="w-8 h-8 text-[#FAC39B] mb-4" />
+                <h3 className="text-lg font-bold text-white">مسرد الألفاظ</h3>
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">المصطلحات</p>
+                <p className="text-2xl font-bold text-white">{stats.glossary.total}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">التصنيفات</p>
+                <p className="text-2xl font-bold text-[#FAC39B]">
+                  {Object.keys(stats.glossary.categories).length}
+                </p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Recent Activity */}
+      <Card>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">النشاطات الأخيرة</h2>
+          <div className="flex items-center gap-2 text-sm text-green-400">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+            مباشر
+          </div>
+        </div>
+        <div className="space-y-4">
+          {realtimeActivity.recentViews.map((activity, index) => (
+            <div key={index} className="flex items-center gap-4 text-gray-400">
+              <div className="w-2 h-2 rounded-full bg-[#FAC39B]"></div>
+              <p>
+                {activity.type === 'page_view' && 'تمت زيارة الموقع'}
+                {activity.type === 'story_view' && 'تمت قراءة قصة'}
+                {activity.type === 'media_view' && 'تمت مشاهدة وسائط'}
+                {' - '}
+                <span className="text-sm">
+                  {new Date(activity.updated_at).toLocaleString('ar-SA', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </p>
+            </div>
+          ))}
+
+          {realtimeActivity.recentViews.length === 0 && (
+            <p className="text-center text-gray-400">لا توجد نشاطات حديثة</p>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+}
