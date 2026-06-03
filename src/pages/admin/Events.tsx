@@ -99,74 +99,66 @@ export default function Events() {
   const totalParticipants = events.reduce((acc, event) => acc + event.participants || 0, 0);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
+    <div className="space-y-5 pb-8" dir="rtl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">إدارة الفعاليات</h1>
-          <p className="text-gray-400">إدارة الفعاليات والأنشطة القادمة</p>
+          <h1 className="text-2xl font-bold text-white">إدارة الفعاليات</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{events.length} فعالية إجمالاً</p>
         </div>
-        <Button onClick={handleAddEvent}>
-          <Plus className="w-5 h-5 ml-2" />
-          إضافة فعالية جديدة
-        </Button>
+        <button onClick={handleAddEvent}
+          className="flex items-center gap-2 px-4 py-2 bg-[#FAC39B] text-[#0F2837] rounded-xl font-medium hover:bg-[#FF9619] transition-all text-sm">
+          <Plus className="w-4 h-4" />إضافة فعالية
+        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <Calendar className="w-6 h-6 text-[#FAC39B] mb-4" />
-          <h3 className="text-sm font-medium text-gray-400">الفعاليات القادمة</h3>
-          <p className="text-2xl font-bold text-white mt-2">{upcomingEvents.length}</p>
-        </Card>
-        <Card>
-          <MapPin className="w-6 h-6 text-[#FAC39B] mb-4" />
-          <h3 className="text-sm font-medium text-gray-400">المدن</h3>
-          <p className="text-2xl font-bold text-white mt-2">{cities.length}</p>
-        </Card>
-        <Card>
-          <Users className="w-6 h-6 text-[#FAC39B] mb-4" />
-          <h3 className="text-sm font-medium text-gray-400">المشاركين</h3>
-          <p className="text-2xl font-bold text-white mt-2">{totalParticipants}</p>
-        </Card>
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { icon: Calendar, label: 'الفعاليات القادمة', value: upcomingEvents.length, color: '#FAC39B' },
+          { icon: MapPin,   label: 'المدن',              value: cities.length,         color: '#91B9B4' },
+          { icon: Users,    label: 'المشاركين',          value: totalParticipants,     color: '#A78BFA' },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div key={label} className="flex items-center gap-3 bg-[#0A1B26] border border-white/8 rounded-xl px-4 py-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}15` }}>
+              <Icon className="w-4 h-4" style={{ color }} />
+            </div>
+            <div><p className="text-xs text-gray-500">{label}</p><p className="text-xl font-bold text-white">{value}</p></div>
+          </div>
+        ))}
       </div>
 
-      {/* Search */}
-      <Card className="mb-8">
-        <Input
-          type="text"
+      <div className="relative">
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
           placeholder="ابحث في الفعاليات..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </Card>
+          className="w-full bg-[#0A1B26] border border-white/8 text-white rounded-xl pr-9 pl-4 py-2.5 text-sm placeholder-gray-600 focus:outline-none focus:border-[#FAC39B]/40 transition-all" />
+      </div>
 
-      {/* Events Table */}
-      <Card>
+      <div className="bg-[#0A1B26] border border-white/8 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">عنوان الفعالية</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">التاريخ</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">المدينة</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">المشاركين</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">الحالة</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">الإجراءات</th>
+              <tr className="border-b border-white/8">
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">عنوان الفعالية</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">التاريخ</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">المدينة</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">المشاركين</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">الحالة</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">الإجراءات</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className="divide-y divide-white/5">
               {filteredEvents.length > 0 ? (
                 filteredEvents.map((event) => (
-                  <tr key={event.id} className="hover:bg-white/5">
-                    <td className="px-6 py-4 text-white">{event.title}</td>
-                    <td className="px-6 py-4 text-white">
+                  <tr key={event.id} className="hover:bg-white/3 transition-colors">
+                    <td className="px-4 py-3 text-sm text-white">{event.title}</td>
+                    <td className="px-4 py-3 text-sm text-white">
                       {new Date(event.date).toLocaleDateString('ar-SA')}
                     </td>
-                    <td className="px-6 py-4 text-white">{event.city}</td>
-                    <td className="px-6 py-4 text-white">
+                    <td className="px-4 py-3 text-sm text-white">{event.city}</td>
+                    <td className="px-4 py-3 text-sm text-white">
                       {event.participants || 0} / {event.max_participants}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <span className={`px-3 py-1 rounded-full text-sm ${
                         event.status === 'published' 
                           ? 'bg-green-500/10 text-green-400'
@@ -175,37 +167,26 @@ export default function Events() {
                         {event.status === 'published' ? 'منشور' : 'مسودة'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <button 
-                          onClick={() => handleEditEvent(event)}
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
-                        >
-                          <Edit className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteEvent(event)}
-                          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-gray-400 hover:text-red-500"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        <button onClick={() => handleEditEvent(event)} className="p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteEvent(event)} className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr className="text-center">
-                  <td colSpan={6} className="px-6 py-8 text-gray-400">
-                    لا توجد فعاليات مضافة بعد
+                  <td colSpan={6} className="px-4 py-12 text-center">
+                      <p className="text-gray-500 text-sm">لا توجد فعاليات بعد</p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
 
-      {/* Add/Edit Modal */}
       <AddEditEvent
         isOpen={isAddEditModalOpen}
         onClose={() => setIsAddEditModalOpen(false)}

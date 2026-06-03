@@ -330,44 +330,47 @@ export default function Stories() {
                     </div>
 
                     <div className="p-5">
-                      <h3 className="text-lg font-bold text-white line-clamp-2 group-hover:text-[#FAC39B] transition-colors mb-3">
+                      {/* Category badge */}
+                      {story.categories && (
+                        <span className="inline-flex items-center gap-1 text-xs text-[#91B9B4] bg-[#91B9B4]/10 px-2 py-1 rounded-lg mb-3">
+                          <Tag className="w-3 h-3" />{story.categories.name}
+                        </span>
+                      )}
+
+                      <h3 className="text-base font-bold text-white line-clamp-2 group-hover:text-[#FAC39B] transition-colors mb-2">
                         {story.title}
                       </h3>
 
+                      {/* Teller name */}
+                      {story.metadata?.teller_name && (
+                        <p className="text-xs text-gray-500 mb-3 flex items-center gap-1">
+                          <span className="w-4 h-4 rounded-full bg-[#FAC39B]/20 inline-flex items-center justify-center flex-shrink-0">
+                            <span className="text-[#FAC39B] text-xs leading-none">✦</span>
+                          </span>
+                          {story.metadata.teller_name}
+                        </p>
+                      )}
+
                       {story.excerpt && (
-                        <p className="text-gray-300 text-sm line-clamp-2 mb-4">
+                        <p className="text-gray-400 text-xs line-clamp-2 mb-4 leading-relaxed">
                           {story.excerpt}
                         </p>
                       )}
 
-                      <div className="flex flex-wrap gap-3 text-xs text-gray-400 mb-4">
-                        {story.region && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-[#FAC39B]" />
-                            <span>{story.region}</span>
-                          </div>
-                        )}
-                        {story.date && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-[#FAC39B]" />
-                            <span>{story.date}</span>
-                          </div>
-                        )}
-                        {story.categories && (
-                          <div className="flex items-center gap-1">
-                            <Tag className="w-3 h-3 text-[#FAC39B]" />
-                            <span>{story.categories.name}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 text-[#FAC39B]">
-                        <span className="font-medium text-sm">
-                          {story.format === 'video' && 'شاهد القصة'}
-                          {story.format === 'audio' && 'استمع'}
-                          {story.format === 'written' && 'اقرأ'}
-                        </span>
-                        <ArrowLeft className="w-4 h-4" />
+                      <div className="flex items-center justify-between pt-3 border-t border-white/8">
+                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                          {story.region && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-[#FAC39B]" />{story.region}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[#FAC39B] text-xs font-medium">
+                          <span>
+                            {story.format === 'video' ? 'شاهد' : story.format === 'audio' ? 'استمع' : 'اقرأ'}
+                          </span>
+                          <ArrowLeft className="w-3.5 h-3.5" />
+                        </div>
                       </div>
                     </div>
                   </Link>

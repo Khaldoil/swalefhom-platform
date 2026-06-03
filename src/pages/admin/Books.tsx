@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Book, BookOpen, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, BookOpen, Eye, EyeOff, ExternalLink, RefreshCw, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -390,28 +390,22 @@ export default function Books() {
         </Card>
       </div>
 
-      {/* Search */}
-      <Card className="mb-8">
-        <div className="flex gap-4">
-          <div className="relative flex-grow">
-            <Input
-              type="text"
+      <div className="bg-[#0A1B26] border border-white/8 rounded-2xl p-4 space-y-3">
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               placeholder="ابحث في الكتب..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+              className="w-full bg-white/5 border border-white/8 text-white rounded-xl pr-9 pl-4 py-2.5 text-sm placeholder-gray-600 focus:outline-none focus:border-[#FAC39B]/40 transition-all" />
           </div>
-          <Button
-            variant="secondary"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="w-5 h-5 ml-2" />
-            تصفية
-          </Button>
+          <button onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-3 py-2.5 border rounded-xl text-sm transition-all ${showFilters ? 'bg-[#FAC39B]/10 border-[#FAC39B]/30 text-[#FAC39B]' : 'bg-white/5 border-white/8 text-gray-400 hover:text-white'}`}>
+            <Filter className="w-4 h-4" />تصفية
+          </button>
         </div>
 
-        {showFilters && (
-          <div className="mt-4 pt-4 border-t border-white/10">
+        {showFilters && categories.length > 0 && (
+          <div className="pt-3 border-t border-white/8">
             <div>
               <h3 className="text-white text-sm font-medium mb-2">التصنيف</h3>
               <div className="flex flex-wrap gap-2">
@@ -442,7 +436,7 @@ export default function Books() {
             </div>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Books Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

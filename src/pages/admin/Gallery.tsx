@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Filter, Film, X, Eye, EyeOff, Upload, CreditCard as Edit } from 'lucide-react';
+import { Filter, Film, X, Eye, EyeOff, Upload, CreditCard as Edit, Search, Image, RefreshCw, Trash2 } from 'lucide-react';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import Input from '../../components/Input';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Calendar, Users, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Calendar, Users, Edit, Trash2, RefreshCw } from 'lucide-react';
 import { getTrainingCourses, createTrainingCourse, updateTrainingCourse, deleteTrainingCourse } from '../../lib/supabase';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -101,74 +101,67 @@ export default function Training() {
   );
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
+    <div className="space-y-5 pb-8" dir="rtl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">إدارة التدريب</h1>
-          <p className="text-gray-400">إدارة الدورات التدريبية والمتدربين</p>
+          <h1 className="text-2xl font-bold text-white">إدارة التدريب</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{courses.length} دورة إجمالاً</p>
         </div>
-        <Button onClick={handleAddCourse}>
-          <Plus className="w-5 h-5 ml-2" />
-          إضافة دورة جديدة
-        </Button>
+        <button onClick={handleAddCourse}
+          className="flex items-center gap-2 px-4 py-2 bg-[#FAC39B] text-[#0F2837] rounded-xl font-medium hover:bg-[#FF9619] transition-all text-sm">
+          <Plus className="w-4 h-4" />إضافة دورة
+        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <Calendar className="w-6 h-6 text-[#FAC39B] mb-4" />
-          <h3 className="text-sm font-medium text-gray-400">الدورات النشطة</h3>
-          <p className="text-2xl font-bold text-white mt-2">{activeCourses.length}</p>
-        </Card>
-        <Card>
-          <Users className="w-6 h-6 text-[#FAC39B] mb-4" />
-          <h3 className="text-sm font-medium text-gray-400">المتدربين</h3>
-          <p className="text-2xl font-bold text-white mt-2">{totalParticipants}</p>
-        </Card>
-        <Card>
-          <Calendar className="w-6 h-6 text-[#FAC39B] mb-4" />
-          <h3 className="text-sm font-medium text-gray-400">الدورات القادمة</h3>
-          <p className="text-2xl font-bold text-white mt-2">{upcomingCourses.length}</p>
-        </Card>
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { icon: Calendar, label: 'الدورات النشطة', value: activeCourses.length, color: '#34D399' },
+          { icon: Users,    label: 'المتدربين',       value: totalParticipants,    color: '#FAC39B' },
+          { icon: Calendar, label: 'القادمة',          value: upcomingCourses.length, color: '#A78BFA' },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div key={label} className="flex items-center gap-3 bg-[#0A1B26] border border-white/8 rounded-xl px-4 py-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}15` }}>
+              <Icon className="w-4 h-4" style={{ color }} />
+            </div>
+            <div><p className="text-xs text-gray-500">{label}</p><p className="text-xl font-bold text-white">{value}</p></div>
+          </div>
+        ))}
       </div>
 
-      {/* Search */}
-      <Card className="mb-8">
-        <Input
-          type="text"
+      <div className="relative">
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
           placeholder="ابحث في الدورات..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </Card>
+          className="w-full bg-[#0A1B26] border border-white/8 text-white rounded-xl pr-9 pl-4 py-2.5 text-sm placeholder-gray-600 focus:outline-none focus:border-[#FAC39B]/40 transition-all" />
+      </div>
 
       {/* Courses Table */}
-      <Card>
+      <div className="bg-[#0A1B26] border border-white/8 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">عنوان الدورة</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">المدرب</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">التاريخ</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">المتدربين</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">الحالة</th>
-                <th className="text-right text-sm font-medium text-gray-400 px-6 py-4">الإجراءات</th>
+              <tr className="border-b border-white/8">
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">عنوان الدورة</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">المدرب</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">التاريخ</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">المتدربين</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">الحالة</th>
+                <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">الإجراءات</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className="divide-y divide-white/5">
               {filteredCourses.length > 0 ? (
                 filteredCourses.map((course) => (
-                  <tr key={course.id} className="hover:bg-white/5">
-                    <td className="px-6 py-4 text-white">{course.title}</td>
-                    <td className="px-6 py-4 text-white">{course.trainer}</td>
-                    <td className="px-6 py-4 text-white">
+                  <tr key={course.id} className="hover:bg-white/3 transition-colors">
+                    <td className="px-4 py-3 text-sm text-white">{course.title}</td>
+                    <td className="px-4 py-3 text-sm text-white">{course.trainer}</td>
+                    <td className="px-4 py-3 text-sm text-white">
                       {new Date(course.start_date).toLocaleDateString('ar-SA')}
                     </td>
-                    <td className="px-6 py-4 text-white">
+                    <td className="px-4 py-3 text-sm text-white">
                       {course.participants || 0} / {course.max_participants}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <span className={`px-3 py-1 rounded-full text-sm ${
                         course.status === 'published' 
                           ? 'bg-green-500/10 text-green-400'
@@ -177,37 +170,26 @@ export default function Training() {
                         {course.status === 'published' ? 'منشور' : 'مسودة'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <button 
-                          onClick={() => handleEditCourse(course)}
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
-                        >
-                          <Edit className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteCourse(course)}
-                          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-gray-400 hover:text-red-500"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        <button onClick={() => handleEditCourse(course)} className="p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteCourse(course)} className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr className="text-center">
-                  <td colSpan={6} className="px-6 py-8 text-gray-400">
-                    لا توجد دورات مضافة بعد
+                  <td colSpan={6} className="px-4 py-12 text-center">
+                      <p className="text-gray-500 text-sm">لا توجد دورات بعد</p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
 
-      {/* Add/Edit Modal */}
       <AddEditTraining
         isOpen={isAddEditModalOpen}
         onClose={() => setIsAddEditModalOpen(false)}
