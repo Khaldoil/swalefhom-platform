@@ -416,7 +416,7 @@ export default function StoryDetails() {
     );
   }
 
-  const readingTime = Math.ceil(story.content.split(' ').length / 200);
+  const _readingTime = Math.ceil(story.content.split(' ').length / 200);
   const FormatIcon = getFormatIcon(story.format);
 
   return (

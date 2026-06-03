@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Filter, CreditCard as Edit, Trash2, Eye, CheckCircle, XCircle, AlertTriangle, Download, Check, Send, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getStories, createStory, updateStory, deleteStory } from '../../lib/supabase';
+import { createStory, updateStory, deleteStory } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -38,8 +38,8 @@ export default function Stories() {
   const [stories, setStories] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [_error, _setError] = useState<string | null>(null);
+  const [_showDetailsModal, _setShowDetailsModal] = useState(false);
   const [selectedStories, setSelectedStories] = useState<string[]>([]);
   const [showDecisionModal, setShowDecisionModal] = useState(false);
   const [decisionType, setDecisionType] = useState<'published' | 'rejected'>('published');
@@ -64,6 +64,7 @@ export default function Stories() {
     { id: 'jawf', name: 'الجوف' }
   ];
 
+   
   useEffect(() => {
     loadStories();
     loadCategories();

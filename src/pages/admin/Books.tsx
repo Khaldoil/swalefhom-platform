@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Book, BookOpen, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import Card from '../../components/Card';
@@ -53,6 +53,7 @@ function AddEditBookModal({ isOpen, onClose, onSubmit, book }: AddEditBookModalP
   });
   const [categories, setCategories] = useState<Category[]>([]);
 
+   
   useEffect(() => {
     loadCategories();
   }, []);
@@ -219,6 +220,7 @@ export default function Books() {
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
 
+   
   useEffect(() => {
     loadBooks();
     loadCategories();

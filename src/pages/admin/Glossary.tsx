@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 import { getGlossaryTerms, createGlossaryTerm, updateGlossaryTerm, deleteGlossaryTerm } from '../../lib/supabase';
 import Card from '../../components/Card';
@@ -20,6 +20,7 @@ export default function Glossary() {
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
 
+   
   useEffect(() => {
     loadTerms();
   }, []);

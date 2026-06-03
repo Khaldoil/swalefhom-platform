@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, CheckCircle, XCircle, AlertTriangle, Eye, Mail, Send } from 'lucide-react';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -22,6 +22,7 @@ export default function Applications() {
   const [isSendingNotification, setIsSendingNotification] = useState(false);
   const { addToast } = useToast();
 
+   
   useEffect(() => {
     loadApplications();
   }, []);

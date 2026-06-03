@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, CreditCard as Edit, Trash2, Award } from 'lucide-react';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -18,6 +18,7 @@ export default function Pioneers() {
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
 
+   
   useEffect(() => {
     loadPioneers();
   }, []);

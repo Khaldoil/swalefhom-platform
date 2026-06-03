@@ -1,4 +1,4 @@
-export const exportToCSV = (data: any[], filename: string) => {
+export const exportToCSV = (data: Record<string, unknown>[], filename: string) => {
   if (!data || data.length === 0) {
     alert('لا توجد بيانات للتصدير');
     return;
@@ -31,7 +31,7 @@ export const exportToCSV = (data: any[], filename: string) => {
   document.body.removeChild(link);
 };
 
-export const exportToJSON = (data: any[], filename: string) => {
+export const exportToJSON = (data: Record<string, unknown>[], filename: string) => {
   if (!data || data.length === 0) {
     alert('لا توجد بيانات للتصدير');
     return;
@@ -51,7 +51,7 @@ export const exportToJSON = (data: any[], filename: string) => {
   document.body.removeChild(link);
 };
 
-export const prepareStoriesForExport = (stories: any[]) => {
+export const prepareStoriesForExport = (stories: Record<string, unknown>[]) => {
   return stories.map(story => ({
     'العنوان': story.title,
     'الراوي': story.storyteller_name,
@@ -64,7 +64,7 @@ export const prepareStoriesForExport = (stories: any[]) => {
   }));
 };
 
-export const preparePioneersForExport = (pioneers: any[]) => {
+export const preparePioneersForExport = (pioneers: Record<string, unknown>[]) => {
   return pioneers.map(pioneer => ({
     'الاسم': pioneer.name,
     'التخصص': pioneer.specialty,
@@ -76,7 +76,7 @@ export const preparePioneersForExport = (pioneers: any[]) => {
   }));
 };
 
-export const prepareAmbassadorsForExport = (ambassadors: any[]) => {
+export const prepareAmbassadorsForExport = (ambassadors: Record<string, unknown>[]) => {
   return ambassadors.map(ambassador => ({
     'الاسم': ambassador.full_name,
     'البريد الإلكتروني': ambassador.email,

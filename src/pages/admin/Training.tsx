@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Calendar, Users, Edit, Trash2 } from 'lucide-react';
 import { getTrainingCourses, createTrainingCourse, updateTrainingCourse, deleteTrainingCourse } from '../../lib/supabase';
 import Card from '../../components/Card';
@@ -18,6 +18,7 @@ export default function Training() {
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
 
+   
   useEffect(() => {
     loadCourses();
   }, []);

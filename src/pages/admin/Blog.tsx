@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Eye, EyeOff, AlertTriangle, LogOut } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import Card from '../../components/Card';
@@ -53,6 +53,7 @@ function AddEditPostModal({ isOpen, onClose, onSubmit, post }: AddEditPostModalP
   });
   const [categories, setCategories] = useState<Category[]>([]);
 
+   
   useEffect(() => {
     loadCategories();
   }, []);
@@ -209,6 +210,7 @@ export default function Blog() {
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
 
+   
   useEffect(() => {
     loadPosts();
     loadCategories();

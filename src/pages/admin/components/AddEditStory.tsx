@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import Modal from '../../../components/Modal';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
@@ -7,12 +6,30 @@ import Select from '../../../components/Select';
 import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../hooks/useToast';
 
+interface Story {
+  id?: string;
+  title?: string;
+  content?: string;
+  category?: string;
+  story_type?: string;
+  format?: string;
+  status?: string;
+  region?: string;
+  category_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
+
 interface AddEditStoryProps {
   isOpen: boolean;
   onClose: () => void;
-  story: any;
-  onSubmit?: (data: any) => void;
-  categories?: any[];
+  story: Story | null;
+  onSubmit?: (data: Record<string, unknown>) => void;
+  categories?: Category[];
 }
 
 export default function AddEditStory({ isOpen, onClose, story, onSubmit, categories: propCategories }: AddEditStoryProps) {

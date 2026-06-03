@@ -6,10 +6,21 @@ import ImageUpload from '../../../components/ImageUpload';
 import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../hooks/useToast';
 
+interface Pioneer {
+  id?: string;
+  name?: string;
+  specialty?: string;
+  bio?: string;
+  region?: string;
+  image_url?: string;
+  years_active?: string;
+  story_count?: number;
+}
+
 interface AddEditPioneerProps {
   isOpen: boolean;
   onClose: () => void;
-  pioneer: any;
+  pioneer: Pioneer | null;
   onSave: () => void;
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Filter, Film, X, Eye, EyeOff, Upload, CreditCard as Edit } from 'lucide-react';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -93,6 +93,7 @@ export default function Gallery() {
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
 
+   
   useEffect(() => {
     loadMedia();
   }, []);

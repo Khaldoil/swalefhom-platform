@@ -32,7 +32,7 @@ async function withRetry<T>(
   maxRetries = 3,
   delay = 1000
 ): Promise<T> {
-  let lastError: any;
+  let lastError: unknown;
   
   for (let i = 0; i < maxRetries; i++) {
     try {
