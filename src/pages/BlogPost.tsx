@@ -10,9 +10,6 @@ import {
   Copy, 
   Check,
   Clock,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
   PenTool
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';

@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
   Users,
-  Camera,
   TrendingUp,
   Eye,
   Headphones,
   Play,
   Download,
   Activity,
-  Award,
-  BarChart2,
   Clock,
   ArrowUp,
   ArrowDown

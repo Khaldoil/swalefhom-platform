@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { cn } from '../utils/cn';
 import LoadingSpinner from './LoadingSpinner';
 

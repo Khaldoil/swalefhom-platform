@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
-import { useInView } from 'react-intersection-observer';
+
 
 interface GalleryViewProps {
   items: {

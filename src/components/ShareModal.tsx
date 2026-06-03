@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Share2, Mail, Apple as WhatsApp } from 'lucide-react';
+import { Copy, Check, Mail, Apple as WhatsApp } from 'lucide-react';
 import Modal from './Modal';
 import Button from './Button';
 

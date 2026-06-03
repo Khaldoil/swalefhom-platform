@@ -27,3 +27,11 @@ dist-ssr
 .env
 .env.local
 .env.production
+
+# Environment variables — DO NOT COMMIT
+.env
+.env.local
+.env.production
+
+# Backup files
+*.bak

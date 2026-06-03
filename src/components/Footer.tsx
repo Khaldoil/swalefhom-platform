@@ -9,7 +9,7 @@ interface FooterProps {
 export default function Footer({ showJuthoor = false }: FooterProps) {
   const navigate = useNavigate();
   const [showAdminHint, setShowAdminHint] = useState(false);
-  const [keySequence, setKeySequence] = useState('');
+  const [_keySequence, setKeySequence] = useState('');
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

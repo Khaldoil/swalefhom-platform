@@ -1,3 +1,4 @@
+import { CONTACT } from '../lib/constants';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -63,7 +64,7 @@ interface Stats {
 }
 
 export default function Home() {
-  const whatsappNumber = "+966557106285";
+  const whatsappNumber = CONTACT.WHATSAPP;
   const [storytellers, setStorytellers] = useState<Storyteller[]>([]);
   const [stats, setStats] = useState<Stats>({
     storytellersCount: 0,

@@ -1,3 +1,4 @@
+import { CONTACT } from '../lib/constants';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send, Book, Heart, Sparkles, Upload, X, Film, Image as ImageIcon, Plus, Mic, MessageSquare } from 'lucide-react';
@@ -72,7 +73,7 @@ export default function Apply() {
     attachments: [] as File[],
   });
 
-  const whatsappNumber = "+966557106285";
+  const whatsappNumber = CONTACT.WHATSAPP;
 
   useEffect(() => {
     if (isSuccess) {

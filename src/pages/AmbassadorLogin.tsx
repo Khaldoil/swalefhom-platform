@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Button from '../components/Button';
 import Input from '../components/Input';
