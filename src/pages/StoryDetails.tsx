@@ -37,6 +37,7 @@ import ShareModal from '../components/ShareModal';
 import Button from '../components/Button';
 import AnnotatedText from '../components/AnnotatedText';
 import { motion } from 'framer-motion';
+import StoryComments from '../components/StoryComments';
 import { useInView } from 'react-intersection-observer';
 import { useContentTracking } from '../hooks/useAnalytics';
 
@@ -814,6 +815,17 @@ export default function StoryDetails() {
               </motion.div>
             )}
           </div>
+        </motion.div>
+
+        {/* Comments */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={fadeInUp}
+          className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"
+        >
+          <StoryComments storyId={story.id} storyTitle={story.title} />
         </motion.div>
 
         {/* Call to Action */}

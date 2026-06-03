@@ -41,6 +41,7 @@ const AdminGlossary = lazy(() => import('./pages/admin/Glossary'));
 const AdminBooks = lazy(() => import('./pages/admin/Books'));
 const Applications = lazy(() => import('./pages/admin/Applications'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
+const AdminComments = lazy(() => import('./pages/admin/Comments'));
 const Categories = lazy(() => import('./pages/admin/Categories'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -86,6 +87,7 @@ export default function App() {
               <Route path="glossary" element={<AdminGlossary />} />
               <Route path="books" element={<AdminBooks />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="comments" element={<AdminComments />} />
             </Route>
             <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
           </Routes>

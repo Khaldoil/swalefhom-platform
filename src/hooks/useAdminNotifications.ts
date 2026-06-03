@@ -72,6 +72,25 @@ export function useAdminNotifications() {
       })
       .subscribe();
 
+    // Subscribe to new comments awaiting moderation
+    const commentCh = supabase
+      .channel('admin-comments-watch')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'story_comments',
+        filter: 'status=eq.pending',
+      }, payload => {
+        const comment = payload.new as Record<string, unknown>;
+        addNotification({
+          type: 'story',
+          title: 'تعليق جديد بانتظار المراجعة',
+          body: `${(comment.commenter_name as string) || ''}: "${((comment.content as string) || '').slice(0, 60)}..."`,
+          link: '/admin/comments',
+        });
+      })
+      .subscribe();
+
     // Subscribe to new ambassador applications
     const ambassadorCh = supabase
       .channel('admin-ambassadors-watch')
@@ -90,7 +109,7 @@ export function useAdminNotifications() {
       })
       .subscribe();
 
-    channelsRef.current = [storyCh, ambassadorCh];
+    channelsRef.current = [storyCh, ambassadorCh, commentCh];
 
     return () => {
       channelsRef.current.forEach(ch => supabase.removeChannel(ch));

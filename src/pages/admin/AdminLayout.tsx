@@ -4,7 +4,7 @@ import {
   LayoutDashboard, BookOpen, Users, Camera, Book,
   LogOut, Settings, Award, UserCheck, Tag, FileText,
   Library, Menu, X, ChevronRight, Bell, Check, Trash2,
-  Clock, BookMarked
+  Clock, BookMarked, MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminNotifications } from '../../hooks/useAdminNotifications';
@@ -39,6 +39,7 @@ export default function AdminLayout() {
     { icon: FileText,        label: 'المدونة',       path: '/admin/blog' },
     { icon: BookMarked,      label: 'مسرد الألفاظ', path: '/admin/glossary' },
     { icon: Library,         label: 'مكتبة الكتب',  path: '/admin/books' },
+    { icon: MessageCircle,   label: 'التعليقات',    path: '/admin/comments' },
   ];
 
   const handleLogout = async () => {
